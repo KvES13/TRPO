@@ -1,7 +1,7 @@
 from flask import render_template, url_for, request, redirect
 from app import app, db
 from app.models import Statistics, DFile
-from .text_handler.file_reader import FileContent
+from .text_handler.file_reader import Analyzer, FileContent
 import os
 from werkzeug.utils import secure_filename
 
@@ -58,7 +58,9 @@ def show_statistics_detail(id):
 def text_analysis():
     dfile = DFile.query.order_by(DFile.date.desc()).first()
     ftext = FileContent(dfile.filename, dfile.filepath, dfile.date)
+    stat = Analyzer(ftext.getFileText())
+
     print(ftext.getDate())
     print("  " + ftext.getFPath())
-    return render_template("text-analysis.html", ftext=ftext)
+    return render_template("text-analysis.html", stat=stat)
 

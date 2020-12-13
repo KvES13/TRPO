@@ -6,24 +6,6 @@
 
 {% block body %}
 
-<!--<div class="container mt-5">-->
-<!--  <h1 >Просмотр</h1>-->
-<!--  <form method="post" enctype="multipart/form-data">-->
-<!--      <input type ="file" name ="file" class = "form-control"><br>-->
-<!--&lt;!&ndash;      <textarea name ="intro" id="intro" class = "form-control"></textarea><br>&ndash;&gt;-->
-<!--&lt;!&ndash;      <textarea name ="text" id = "text" class = "form-control"></textarea><br>&ndash;&gt;-->
-<!--      <input type = "submit" class = "btn btn-success" value="Отправить">-->
-<!--  </form>-->
-<!--</div>-->
-
-<!--<div class="container mt-5">-->
-<!--    <a href="/index" class="btn btn-warning">Назад</a>-->
-<!--  <h1 >Статистика файла "{{ftext.getFName()}}"</h1>-->
-<!--    <div class="alert alert-info">-->
-<!--        <p><b>Дата: {{ftext.getDate() }}</b></p>-->
-<!--        <div style="width:770px; padding-left:15px; padding-right:15px;">{{ ftext.getFPath()}}</div>-->
-<!--    </div>-->
-<!--</div>-->
     <div class="row mb-2 ml-5" >
     <div class="col-md-4">
          <p>
@@ -42,22 +24,43 @@
             <tr>
               <th>Часть предложения</th>
               <th>Количество</th>
-              <th>Частота</th>
+              <th>Частота %</th>
             </tr>
           </thead>
           <tbody>
+           {% for key, value in stat.getDict().items() %}
             <tr>
-              <td>Lorem</td>
-              <td>ipsum</td>
-              <td>dolor</td>
+              <td>{{key}}</td>
+              <td>{{ value }}</td>
+              <td>{{ value/stat.calculateWordsCount() * 100 }}</td>
             </tr>
+          {% endfor %}
           </tbody>
         </table>
     </div>
-    <div class="col-md-6">
-       <textarea name="user-text" cols="110" rows="15" placeholder="Вставьте текст..."  readonly>  {{ftext.getFileText() }}</textarea>
-    </div>
+    <section>
+
+       <textarea class="textarea-bootstrap-highlight" cols="110" rows="20" placeholder="Вставьте текст..." readonly>
+           {{stat.getText()}}
+       </textarea>
+            <script>
+$('.textarea-bootstrap-highlight').highlightWithinTextarea({
+    highlight: [
+        'TV',
+        'Television',
+        'Notebook',
+        'Computer',
+        'CDs',
+        'DVDs',
+        'Smart Phone',
+        'Galaxy'
+    ]
+});
+       </script>
+    </section>
+
   </div>
+
 
 
 
