@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Статистика
+{% endblock %}
+
+{% block body %}
+
+<div class="container mt-5">
+  <h1 >Просмотр</h1>
+    {% for el in stat %}
+    <div class="alert alert-info">
+        <h2>{{el.title}}</h2>
+        <p2>{{el.intro}}</p2>
+        <p><b>Дата:{{el.date.date()}}</b></p>
+        <a href="/show-statistics/{{el.id}}" class="btn btn-warning">Детальнее</a>
+    </div>
+    {% endfor %}
+</div>
+
+
+{% endblock %}

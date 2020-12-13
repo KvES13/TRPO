@@ -6,8 +6,20 @@
 
 {% block body %}
 
+<main class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-white text-center bg-dark">
+    <h1 class="display-4">Загрузка файла</h1>
+    <p class="lead">
+        <form method="POST" enctype="multipart/form-data">
+    <p class="lead"><input type="file" name="file">
+    <p class="lead">
+        <a  href="#" class="btn btn-lg btn-secondary font-weight-bold  bg-dark">
+          <input type = "submit"  k value="Загрузить"></a> </p>
+    </form>
+    </p>
+</main>
+
 <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-  <h1 class="display-4">Стоимость</h1>
+  <h1 class="display-4">Версии</h1>
   <p class="lead">Выберите подходящий пакет, для анализа текста.</p>
 </div>
 
@@ -54,6 +66,7 @@
             <button type="button" class="btn btn-lg btn-block btn-primary">Contact us</button>
           </div>
         </div>
+      </div>
       </div>
 
 {% endblock %}
