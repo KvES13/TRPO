@@ -14,8 +14,6 @@ def index():
     if request.method == 'POST':
         file = request.files["file"]
         if file:
-            print("POST")
-            print(file.filename)
             filename = file.filename
             filepath = os.path.join(uploads_dir, secure_filename(file.filename))
             file.save(filepath)
@@ -27,7 +25,6 @@ def index():
             except:
                 return "При добавлении произошла ошибка"
     else:
-        print("GET")
         return render_template("/index.html")
 
 
@@ -38,7 +35,11 @@ def about():
 
 @app.route('/show-statistics')
 def show_statistics():
-    stat = Statistics.query.order_by(Statistics.date.desc()).all()
+    exists = Statistics.query.first()
+    if exists:
+        stat = Statistics.query.order_by(Statistics.date.desc()).all()
+    else:
+        stat = 0
     return render_template("show-statistics.html", stat=stat)
 
 
@@ -57,10 +58,12 @@ def show_statistics_detail(id):
 @app.route("/text-analysis")
 def text_analysis():
     dfile = DFile.query.order_by(DFile.date.desc()).first()
-    ftext = FileContent(dfile.filename, dfile.filepath, dfile.date)
-    stat = Analyzer(ftext.getFileText())
+    if dfile:
+        ftext = FileContent(dfile.filename, dfile.filepath, dfile.date)
+        stat = Analyzer(ftext.getFileText())
+    else:
+        ftext = FileContent("dfile.filename", "dfile.filepath", "dfile.date")
+        stat = Analyzer(" ")
 
-    print(ftext.getDate())
-    print("  " + ftext.getFPath())
     return render_template("text-analysis.html", stat=stat)
 

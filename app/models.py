@@ -17,10 +17,14 @@ class DFile(db.Model):
 
 class Statistics(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    intro = db.Column(db.String(300), nullable=False)
-    text = db.Column(db.Text, nullable=False)
-    date = db.Column(db.DateTime, default=datetime.utcnow)
+    parent_id = db.Column(db.Integer,  nullable=False)
+    words_count = db.Column(db.Integer, nullable=False)
+    subject = db.Column(db.Integer, nullable=False)
+    predicate = db.Column(db.Integer, nullable=False)
+    addition = db.Column(db.Integer, nullable=False)
+    attribute = db.Column(db.Integer, nullable=False)
+    adverbial_modifier = db.Column(db.Integer, nullable=False)
+    unknown = db.Column(db.Integer, nullable=False)
 
     def __repr__(self):
         return '<Statistics %r>' % self.id

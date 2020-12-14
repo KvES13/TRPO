@@ -6,6 +6,8 @@
 
 {% block body %}
 
+{% if stat != 0 %}
+
 <div class="container mt-5">
   <h1 >Просмотр</h1>
     {% for el in stat %}
@@ -17,6 +19,6 @@
     </div>
     {% endfor %}
 </div>
-
+{% endif %}
 
 {% endblock %}
