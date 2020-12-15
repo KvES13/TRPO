@@ -1,24 +1,8 @@
 from werkzeug.utils import secure_filename
-import os
-from app import db
 import pymorphy2 as py
 import re
 import string
-import io
 
-source = '''
-Вася ест кашу
-# сущ  гл  сущ
-# что/кто  делает с_чем-то
-NOUN,nomn VERB NOUN,accs
-
-Красивый цветок
-ADJF NOUN
-
-Птица сидит на крыше
-# сущ  гл  предлог сущ
-NOUN,nomn VERB NOUN,loct
-'''
 
 
 MAX_FILE_SIZE = 10 * (1024 * 1024) + 1
@@ -66,9 +50,10 @@ class Analyzer(object):
     def __init__(self, text):
         self.text = text
         self.stat = {"Подлежащее": 0, "Сказуемое": 0, "Дополнение": 0,
-                     "Определение": 0, "Обстоятельство": 0, "Остатки": 0}
+                     "Определение": 0, "Обстоятельство": 0, "Неизвестно": 0}
         # self.patterns = parseSource(source)
         self.ultra_mega_algo()
+        self.words_count = self.calculateWordsCount()
 
     def calculateWordsCount(self):
         words = self.text.split()
@@ -84,6 +69,8 @@ class Analyzer(object):
     def getDict(self):
         return self.stat
 
+    def getWordsCount(self):
+        return self.words_count
 
     def ultra_mega_algo(self):
         split_regex = re.compile(r'[.|!|?|…]')
@@ -92,24 +79,26 @@ class Analyzer(object):
             morph = py.MorphAnalyzer()
             words = s.split()
             for word in words:
-
                 word = word.strip(string.punctuation)
                 p = morph.parse(word)[0]
                 if p.tag.POS in subject:
                     if p.tag.case == subject_cases:
                         self.stat["Подлежащее"] += 1
+                    else:
+                        self.stat["Дополнение"] += 1
+                elif p.tag.POS in addition or p.tag.POS in rest:
+                    self.stat["Дополнение"] += 1
+
                 elif p.tag.POS in predicate:
                     self.stat["Сказуемое"] += 1
-                elif p.tag.POS in addition:
-                    self.stat["Дополнение"] += 1
                 elif p.tag.POS in attribute:
                     self.stat["Определение"] += 1
-                elif p.tag.POS in subject:
+                elif p.tag.POS in adverbial_modifier:
                     self.stat["Обстоятельство"] += 1
                 else:
-                    self.stat["Остатки"] += 1
-                # self.calculateWordsCount(p.tag.POS)
-                print(p.tag.POS, word)
+                    self.stat["Неизвестно"] += 1
+
+
     # def calculate_sentence_part(self,speech_part):
     #     if speech_part == "NOUN"
 

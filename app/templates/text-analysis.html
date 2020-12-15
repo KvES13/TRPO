@@ -31,12 +31,12 @@
            {% for key, value in stat.getDict().items() %}
             <tr>
               <td>{{key}}</td>
-                {% if stat.calculateWordsCount() == 0 %}
+                {% if stat.getWordsCount() == 0 %}
               <td>{{ 0 }}</td>
               <td>{{ 0 }}</td>
                  {% else %}
                 <td>{{ value }}</td>
-              <td>{{ value/stat.calculateWordsCount() * 100 }}</td>
+              <td>{{ value/stat.getWordsCount() * 100 }}</td>
                 {% endif %}
             </tr>
           {% endfor %}

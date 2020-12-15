@@ -1,6 +1,6 @@
 from flask import render_template, url_for, request, redirect
-from app import app, db
-from app.models import Statistics, DFile
+from app import app, db, models
+from datetime import datetime
 from .text_handler.file_reader import Analyzer, FileContent
 import os
 from werkzeug.utils import secure_filename
@@ -16,14 +16,25 @@ def index():
         if file:
             filename = file.filename
             filepath = os.path.join(uploads_dir, secure_filename(file.filename))
-            file.save(filepath)
-            dfile = DFile(filename=filename, filepath=filepath)
-            try:
-                db.session.add(dfile)
+
+            exists = models.DFile.query.filter_by(filename=filename).first()
+            print(filepath)
+            if exists:
+                print(exists)
+                print("YES")
+                exists.date = datetime.now()
                 db.session.commit()
                 return redirect('/text-analysis')
-            except:
-                return "При добавлении произошла ошибка"
+            else:
+                print("NO")
+                file.save(filepath)
+                dfile = models.DFile(filename=filename, filepath=filepath, date=datetime.now())
+                try:
+                    db.session.add(dfile)
+                    db.session.commit()
+                    return redirect('/text-analysis')
+                except:
+                    return "При добавлении произошла ошибка"
     else:
         return render_template("/index.html")
 
@@ -35,18 +46,22 @@ def about():
 
 @app.route('/show-statistics')
 def show_statistics():
-    exists = Statistics.query.first()
+    exists = models.DFile.query.first()
     if exists:
-        stat = Statistics.query.order_by(Statistics.date.desc()).all()
+        print("ex show")
+        files = models.DFile.query.order_by(models.DFile.date.desc()).all()
+        print(files)
     else:
-        stat = 0
-    return render_template("show-statistics.html", stat=stat)
+        print("net show")
+        files = 0
+    return render_template("show-statistics.html", files=files)
 
 
 @app.route('/show-statistics/<int:id>')
 def show_statistics_detail(id):
-    stat = Statistics.query.get(id)
-    return render_template("statistics-detail.html", stat=stat)
+    stat = models.Statistics.query.filter_by(parent_id=id).first()
+    dfile = models.DFile.query.get(id)
+    return render_template("statistics-detail.html", stat=stat, dfile=dfile)
 
 
 # # Create a directory in a known location to save files to.
@@ -57,10 +72,27 @@ def show_statistics_detail(id):
 
 @app.route("/text-analysis")
 def text_analysis():
-    dfile = DFile.query.order_by(DFile.date.desc()).first()
+    dfile = models.DFile.query.order_by(models.DFile.date.desc()).first()
+    print("***************************")
     if dfile:
+        print(dfile.filename,"  fNAME")
         ftext = FileContent(dfile.filename, dfile.filepath, dfile.date)
         stat = Analyzer(ftext.getFileText())
+        exists = models.Statistics.query.filter_by(parent_id=dfile.id).first()
+        print(exists, "  exists ")
+        if exists:
+            print("ex")
+        else:
+            temp_dict = stat.getDict()
+            rec = models.Statistics(parent_id=dfile.id, words_count=stat.words_count,
+                                    subject=temp_dict.get("Подлежащее"), predicate=temp_dict.get("Сказуемое"),
+                                    addition=temp_dict.get("Дополнение"),  attribute=temp_dict.get("Определение"),
+                                    adverbial_modifier=temp_dict.get("Обстоятельство"), unknown=temp_dict.get("Неизвестно"))
+            try:
+                db.session.add(rec)
+                db.session.commit()
+            except:
+                return "При добавлении произошла ошибка"
     else:
         ftext = FileContent("dfile.filename", "dfile.filepath", "dfile.date")
         stat = Analyzer(" ")

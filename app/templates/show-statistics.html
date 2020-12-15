@@ -1,24 +1,27 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Статистика
+История загрузок
 {% endblock %}
 
 {% block body %}
 
-{% if stat != 0 %}
+{% if files != 0 %}
 
 <div class="container mt-5">
   <h1 >Просмотр</h1>
-    {% for el in stat %}
+    {% for el in files %}
     <div class="alert alert-info">
-        <h2>{{el.title}}</h2>
-        <p2>{{el.intro}}</p2>
+        <h2>{{el.filename}}</h2>
+        <p2>{{el.filepath}}</p2>
         <p><b>Дата:{{el.date.date()}}</b></p>
         <a href="/show-statistics/{{el.id}}" class="btn btn-warning">Детальнее</a>
     </div>
     {% endfor %}
 </div>
+{% else %}
+Пока нет записей D:
 {% endif %}
+
 
 {% endblock %}

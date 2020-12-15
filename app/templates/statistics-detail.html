@@ -1,18 +1,126 @@
 {% extends 'base.html' %}
 
 {% block title %}
-{{ stat.title }}
+test
 {% endblock %}
 
 {% block body %}
 
 <div class="container mt-5">
     <a href="/show-statistics" class="btn btn-warning">Назад</a>
-  <h1 >Статистика файла "{{stat.title}}"</h1>
-    <div class="alert alert-info">
-        <p>{{ stat.text}}</p>
-        <p><b>Дата: {{stat.date.date() }}</b></p>
-    </div>
+  <h1 >Статистика файла "{{dfile.filename}}"</h1>
+    <div class="row">
+
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card">
+                        <div class="card-heading p-4">
+                            <div class="mini-stat-icon float-right">
+                                <i class="mdi mdi-cube-outline bg-primary  text-white"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-16">Подлежащие</h5>
+                            </div>
+                            <h3 class="mt-4">{{stat.subject}}</h3>
+                            <div class="progress mt-4" style="height: 4px;">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: {{stat.subject/stat.words_count*100 }}%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <p class="text-muted mt-2 mb-0">Previous period<span class="float-right">{{'%0.2f'|format(stat.subject/stat.words_count*100|float) }}%</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card">
+                        <div class="card-heading p-4">
+                            <div class="mini-stat-icon float-right">
+                                <i class="mdi mdi-briefcase-check bg-success text-white"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-16">Сказуемые</h5>
+                            </div>
+                            <h3 class="mt-4">{{stat.predicate}}</h3>
+                            <div class="progress mt-4" style="height: 4px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{stat.predicate/stat.words_count*100 }}%" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <p class="text-muted mt-2 mb-0">Previous period<span class="float-right">{{'%0.2f'|format(stat.predicate/stat.words_count*100|float) }}%</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card">
+                        <div class="card-heading p-4">
+                            <div class="mini-stat-icon float-right">
+                                <i class="mdi mdi-tag-text-outline bg-warning text-white"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-16">Прилагательные</h5>
+                            </div>
+                            <h3 class="mt-4">{{stat.addition}}</h3>
+                            <div class="progress mt-4" style="height: 4px;">
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: {{stat.addition/stat.words_count*100 }}%" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <p class="text-muted mt-2 mb-0">Previous period<span class="float-right">{{'%0.2f'|format(stat.addition/stat.words_count*100|float) }}%</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                                <div class="col-sm-6 col-xl-3">
+                    <div class="card">
+                        <div class="card-heading p-4">
+                            <div class="mini-stat-icon float-right">
+                                <i class="mdi mdi-cube-outline bg-primary  text-white"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-16">Дополнения</h5>
+                            </div>
+                            <h3 class="mt-4">{{ stat.attribute}}</h3>
+                            <div class="progress mt-4" style="height: 4px;">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: {{stat.attribute/stat.words_count*100 }}%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <p class="text-muted mt-2 mb-0">Previous period<span class="float-right">{{'%0.2f'|format(stat.attribute/stat.words_count*100|float) }}%</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card">
+                        <div class="card-heading p-4">
+                            <div class="mini-stat-icon float-right">
+                                <i class="mdi mdi-briefcase-check bg-success text-white"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-16">Обстоятельства</h5>
+                            </div>
+                            <h3 class="mt-4">{{ stat.adverbial_modifier}}</h3>
+                            <div class="progress mt-4" style="height: 4px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{stat.adverbial_modifier/stat.words_count*100 }}%" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <p class="text-muted mt-2 mb-0">Previous period<span class="float-right">{{'%0.2f'|format(stat.adverbial_modifier/stat.words_count*100|float) }}%</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card">
+                        <div class="card-heading p-4">
+                            <div class="mini-stat-icon float-right">
+                                <i class="mdi mdi-tag-text-outline bg-warning text-white"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-16">Неизвестно</h5>
+                            </div>
+                            <h3 class="mt-4">{{ stat.unknown }}</h3>
+                            <div class="progress mt-4" style="height: 4px;">
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: {{stat.unknown/stat.words_count*100 }}%" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <p class="text-muted mt-2 mb-0">Previous period<span class="float-right">{{'%0.2f'|format(stat.unknown/stat.words_count*100|float) }}%</span></p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
 </div>
 
 

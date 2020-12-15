@@ -9,7 +9,7 @@ class DFile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(30), nullable=False)
     filepath = db.Column(db.String(100), nullable=False)
-    date = db.Column(db.DateTime, default=datetime.utcnow)
+    date = db.Column(db.DateTime, default=datetime.now())
 
     def __repr__(self):
         return '<DFile %r>' % self.id
@@ -25,6 +25,9 @@ class Statistics(db.Model):
     attribute = db.Column(db.Integer, nullable=False)
     adverbial_modifier = db.Column(db.Integer, nullable=False)
     unknown = db.Column(db.Integer, nullable=False)
+
+    create_fields = update_fields = ['parent_id', 'words_count', 'subject', 'predicate',
+                                     'addition', 'attribute', 'adverbial_modifier', 'unknown']
 
     def __repr__(self):
         return '<Statistics %r>' % self.id
