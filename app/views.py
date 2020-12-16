@@ -24,7 +24,7 @@ def index():
                 filename = file.filename
                 filepath = os.path.join(uploads_dir, secure_filename(file.filename))
 
-                exists = models.DFile.query.filter_by(filename=filename).first()
+                exists = models.Files.query.filter_by(filename=filename).first()
                 if exists:
                     exists.date = datetime.now()
                     db.session.commit()
@@ -33,7 +33,7 @@ def index():
                     print(file_format)
                     print("      form")
                     file.save(filepath)
-                    dfile = models.DFile(filename=filename, filepath=filepath,
+                    dfile = models.Files(filename=filename, filepath=filepath,
                                          date=datetime.now())
                     try:
                         db.session.add(dfile)
@@ -53,10 +53,10 @@ def about():
 
 @app.route('/show-statistics')
 def show_statistics():
-    exists = models.DFile.query.first()
+    exists = models.Files.query.first()
     if exists:
         print("ex show")
-        files = models.DFile.query.order_by(models.DFile.date.desc()).all()
+        files = models.Files.query.order_by(models.Files.date.desc()).all()
         print(files)
     else:
         print("net show")
@@ -67,7 +67,7 @@ def show_statistics():
 @app.route('/show-statistics/<int:id>')
 def show_statistics_detail(id):
     stat = models.Statistics.query.filter_by(parent_id=id).first()
-    dfile = models.DFile.query.get(id)
+    dfile = models.Files.query.get(id)
 
     # parts = {sentence_part[0]: stat.subject, sentence_part[1]: stat.predicate, sentence_part[2]: stat.addition,
     #          sentence_part[3]: stat.attribute, sentence_part[4]: stat.adverbial_modifier,
@@ -85,17 +85,21 @@ def show_statistics_detail(id):
 
 @app.route("/text-analysis")
 def text_analysis():
-    dfile = models.DFile.query.order_by(models.DFile.date.desc()).first()
+    dfile = models.Files.query.order_by(models.Files.date.desc()).first()
     print("***************************")
+    stat = 0
     if dfile:
-        print(dfile.filename,"  fNAME")
+        print(dfile.filename, "  fNAME")
         ftext = FileContent(dfile.filename, dfile.filepath, dfile.date, allowed_file(dfile.filename))
-        stat = Analyzer(ftext.getFileText())
+
         exists = models.Statistics.query.filter_by(parent_id=dfile.id).first()
         print(exists, "  exists ")
         if exists:
-            print("ex")
+            print("exxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
         else:
+            print("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs")
+            stat = Analyzer(dfile.id, ftext.getFileText())
+            stat.ultra_mega_algo()
             temp_dict = stat.getDict()
             rec = models.Statistics(parent_id=dfile.id, words_count=stat.words_count,
                                     subject=temp_dict.get(sentence_part[0]), predicate=temp_dict.get(sentence_part[1]),
@@ -106,9 +110,7 @@ def text_analysis():
                 db.session.add(rec)
                 db.session.commit()
             except:
-                return "При добавлении произошла ошибка"
-    else:
-        stat = Analyzer(" ")
+                return render_template("text-analysis.html", stat=0)
 
     return render_template("text-analysis.html", stat=stat)
 

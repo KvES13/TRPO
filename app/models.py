@@ -5,7 +5,7 @@ from datetime import datetime
 # >>> from app import db
 # >>> db.create_all()
 
-class DFile(db.Model):
+class Files(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(30), nullable=False)
     filepath = db.Column(db.String(100), nullable=False)
@@ -31,3 +31,35 @@ class Statistics(db.Model):
 
     def __repr__(self):
         return '<Statistics %r>' % self.id
+
+
+class Sentences(db.Model):
+    # file_id = db.Column(db.Integer, db.ForeignKey('files.id'), primary_key=True)
+    file_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer,  primary_key=True)
+    text = db.Column(db.Text, nullable=False)
+
+    def __repr__(self):
+        return f'<Sentences {self.text}>'
+
+
+class Words(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    word = db.Column(db.Text, nullable=False)
+
+    def __repr__(self):
+        return f'<Words {self.word}>'
+
+
+class WordsList(db.Model):
+    file_id = db.Column(db.Integer, primary_key=True)
+    sentence_id = db.Column(db.Integer,  primary_key=True)
+    word_id = db.Column(db.Integer )
+    # file_id = db.Column(db.Integer, db.ForeignKey('files.id'), primary_key=True)
+    # sentence_id = db.Column(db.Integer, db.ForeignKey('sentences.id'), primary_key=True)
+    # word_id = db.Column(db.Integer, db.ForeignKey('words.id'))
+    word_num = db.Column(db.Integer, primary_key=True)
+    role = db.Column(db.Integer, nullable=False)
+
+    def __repr__(self):
+        return f'<WordsList {self.role}>'
