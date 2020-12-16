@@ -1,7 +1,7 @@
 from flask import render_template, url_for, request, redirect
 from app import app, db, models
 from datetime import datetime
-from .text_handler.file_reader import Analyzer, FileContent, sentence_part
+from .text_handler.file_reader import Analyzer, FileContent, sentence_part, allowed_file
 import os
 from werkzeug.utils import secure_filename
 
@@ -14,26 +14,36 @@ bg_colors = ('bg-primary', 'bg-success', 'bg-warning', 'bg-info', 'bg-dark', 'bg
 def index():
     if request.method == 'POST':
         file = request.files["file"]
+        print("text")
         if file:
-            filename = file.filename
-            filepath = os.path.join(uploads_dir, secure_filename(file.filename))
-
-            exists = models.DFile.query.filter_by(filename=filename).first()
-            if exists:
-                exists.date = datetime.now()
-                db.session.commit()
-                return redirect('/text-analysis')
+            file_format = allowed_file(file.filename)
+            if file_format == 'undef':
+                return render_template("/index.html", error="Формат данного файла не поддерживается")
             else:
-                file.save(filepath)
-                dfile = models.DFile(filename=filename, filepath=filepath, date=datetime.now())
-                try:
-                    db.session.add(dfile)
+                print(file.filename)
+                filename = file.filename
+                filepath = os.path.join(uploads_dir, secure_filename(file.filename))
+
+                exists = models.DFile.query.filter_by(filename=filename).first()
+                if exists:
+                    exists.date = datetime.now()
                     db.session.commit()
                     return redirect('/text-analysis')
-                except:
-                    return "При добавлении произошла ошибка"
+                else:
+                    print(file_format)
+                    print("      form")
+                    file.save(filepath)
+                    dfile = models.DFile(filename=filename, filepath=filepath,
+                                         date=datetime.now())
+                    try:
+                        db.session.add(dfile)
+                        db.session.commit()
+                        return redirect('/text-analysis')
+                    except:
+                        return render_template("/index.html", error="При добавлени записи произошла ошибка")
+
     else:
-        return render_template("/index.html")
+        return render_template("/index.html", error=0)
 
 
 @app.route('/about')
@@ -79,7 +89,7 @@ def text_analysis():
     print("***************************")
     if dfile:
         print(dfile.filename,"  fNAME")
-        ftext = FileContent(dfile.filename, dfile.filepath, dfile.date)
+        ftext = FileContent(dfile.filename, dfile.filepath, dfile.date, allowed_file(dfile.filename))
         stat = Analyzer(ftext.getFileText())
         exists = models.Statistics.query.filter_by(parent_id=dfile.id).first()
         print(exists, "  exists ")

@@ -2,14 +2,13 @@ from werkzeug.utils import secure_filename
 import pymorphy2 as py
 import re
 import string
+import docx
 
 
-
-MAX_FILE_SIZE = 10 * (1024 * 1024) + 1
-ALLOWED_EXTENSIONS = {'txt', 'docx'}
+MAX_FILE_SIZE =  (1024 * 1024) + 1
 
 subject = ("NOUN", "NPRO")
-subject_cases = "nomn"
+subject_cases = 'nomn'
 predicate = ("VERB", "INFN", "GRND")
 addition = ("NUMR", )
 attribute = ("ADJF", "ADJS", "PRTF")
@@ -20,16 +19,25 @@ sentence_part = ("Подлежащее", "Сказуемое", "Дополнен
                  "Определение", "Обстоятельство", "Неизвестно")
 
 class FileContent(object):
-    def __init__(self, filename, filepath, date):
+    def __init__(self, filename, filepath, date, fileformat):
         self.__filename = filename
         self.__filepath = filepath
         self.__date = date
+        self.__format = fileformat
 
 
     def getFileText(self):
-        with open(self.__filepath, encoding="utf8") as f:
-            text = f.read()
+        if self.__format == 'txt':
+            with open(self.__filepath, "r", encoding="utf8") as f:
+                text = f.read()
+                return text
+        elif self.__format == 'docx':
+            doc = docx.Document(self.__filepath)
+            text = ""
+            for paragraph in doc.paragraphs:
+                text += paragraph.text+'\n'
             return text
+
         return "ERROR"
 
 
@@ -43,6 +51,9 @@ class FileContent(object):
 
     def getFPath(self):
         return self.__filepath
+
+    def getFormat(self):
+        return self.__format
 
 
 class Analyzer(object):
@@ -60,7 +71,7 @@ class Analyzer(object):
     def calculateWordsCount(self):
         words = self.text.split()
         self.words_count = len(words)
-        print(self.words_count)
+        print(self.words_count, "words count ************", words)
         return self.words_count
 
 
@@ -75,31 +86,31 @@ class Analyzer(object):
         return self.words_count
 
     def ultra_mega_algo(self):
-        split_regex = re.compile(r'[.|!|?|…]')
-        sentences = filter(lambda t: t, [t.strip() for t in split_regex.split(self.text)])
-        for s in sentences:
-            morph = py.MorphAnalyzer()
-            words = s.split()
-            for word in words:
-                word = word.strip(string.punctuation)
-                p = morph.parse(word)[0]
-                if p.tag.POS in subject:
-                    if p.tag.case == subject_cases:
-                        self.stat["Подлежащее"] += 1
-                    else:
-                        self.stat["Дополнение"] += 1
-                elif p.tag.POS in addition or p.tag.POS in rest:
-                    self.stat["Дополнение"] += 1
-
-                elif p.tag.POS in predicate:
-                    self.stat["Сказуемое"] += 1
-                elif p.tag.POS in attribute:
-                    self.stat["Определение"] += 1
-                elif p.tag.POS in adverbial_modifier:
-                    self.stat["Обстоятельство"] += 1
+        # split_regex = re.compile(r'[.|!|?|…]')
+        # sentences = filter(lambda t: t, [t.strip() for t in split_regex.split(self.text)])
+        # for s in sentences:
+        morph = py.MorphAnalyzer()
+        #     words = s.split()
+        for word in self.text.split(" "):
+            word = word.strip(string.punctuation)
+            p = morph.parse(word)[0]
+            if p.tag.POS in subject:
+                if p.tag.case == subject_cases:
+                    self.stat["Подлежащее"] += 1
                 else:
-                    self.stat["Неизвестно"] += 1
+                    self.stat["Дополнение"] += 1
+            elif p.tag.POS in addition or p.tag.POS in rest:
+                self.stat["Дополнение"] += 1
+            elif p.tag.POS in predicate:
+                self.stat["Сказуемое"] += 1
+            elif p.tag.POS in attribute:
+                self.stat["Определение"] += 1
+            elif p.tag.POS in adverbial_modifier:
+                self.stat["Обстоятельство"] += 1
+            else:
+                self.stat["Неизвестно"] += 1
 
+            print(p.tag.POS,  word)
 
     # def calculate_sentence_part(self,speech_part):
     #     if speech_part == "NOUN"
@@ -125,8 +136,14 @@ class Analyzer(object):
 
 
 def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+    if '.' in filename and filename.rsplit('.', 1)[1] == 'txt':
+        return 'txt'
+    elif '.' in filename and filename.rsplit('.', 1)[1] == 'docx':
+        return 'docx'
+    else:
+        return 'undef'
+
+
 
 
 
