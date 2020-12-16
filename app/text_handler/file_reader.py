@@ -16,6 +16,8 @@ attribute = ("ADJF", "ADJS", "PRTF")
 adverbial_modifier = ("COMP", "ADVB", "PRED")
 rest = ("PREP", "CONJ", "PRCL", "INTJ")
 
+sentence_part = ("Подлежащее", "Сказуемое", "Дополнение",
+                 "Определение", "Обстоятельство", "Неизвестно")
 
 class FileContent(object):
     def __init__(self, filename, filepath, date):
@@ -49,8 +51,8 @@ class Analyzer(object):
 
     def __init__(self, text):
         self.text = text
-        self.stat = {"Подлежащее": 0, "Сказуемое": 0, "Дополнение": 0,
-                     "Определение": 0, "Обстоятельство": 0, "Неизвестно": 0}
+        self.stat = {sentence_part[0]: 0, sentence_part[1]: 0, sentence_part[2]: 0,
+                     sentence_part[3]: 0, sentence_part[4]: 0, sentence_part[5]: 0}
         # self.patterns = parseSource(source)
         self.ultra_mega_algo()
         self.words_count = self.calculateWordsCount()
