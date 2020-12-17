@@ -67,9 +67,7 @@ class Analyzer(object):
 
     def calculateWordsCount(self):
         words = self.text.split()
-        self.words_count = len(words)
-        print(self.words_count, "words count ************", words)
-        return self.words_count
+        return len(words)
 
     def getText(self):
         # parseText(self.patterns, self.text)
@@ -122,26 +120,26 @@ class Analyzer(object):
                 if word not in unique_words:
                     ind = models.Words.query.get(word)
                     if ind:
-                        #Кривые индексы
+                        # Кривые индексы
                         unique_words[word] = ind.id
-                        print(ind, "            ind id ")
-                        print(ind.id, "            ind id ")
+                        # print(ind, "            ind id ")
+                        # print(ind.id, "            ind id ")
                     else:
                         ind = models.Words.query.count()
-                        print(ind, "          count   ind id ")
+                        # print(ind, "          count   ind id ")
                         if ind != 0:
-                            unique_words[word] = ind+word_counter
-                            print(word_counter, "          wcccccccc ",ind)
+                            unique_words[word] = ind + word_counter
+                            # print(word_counter, "          wcccccccc ", ind)
                         else:
                             unique_words[word] = word_counter
-                            print(word_counter, "          wcccccccc ")
+                            # print(word_counter, "          wcccccccc ")
 
                     u_word_record = models.Words(word=word)
                     words_list.append(u_word_record)
                     # word_index += 1
                     # print(word_index)
-
-                sentence_record = models.Sentences(file_id=self.text_id, id=counter, text=s)
+                # TODO Раскидать по функцияи и файлам
+                sentence_record = models.Sentences(file_id=self.text_id, number=counter, text=s)
                 word_record = models.WordsList(file_id=self.text_id, sentence_id=counter,
                                                word_id=unique_words.get(word), word_num=word_counter, role=role)
                 word_records_list.append(word_record)
@@ -157,7 +155,17 @@ class Analyzer(object):
             counter += 1
         words_list.clear()
         word_records_list.clear()
-        print(unique_words)
+        u_word_record.clear()
+        # TODO Перенести в другой файл
+        rec = models.Statistics(parent_id=self.text_id, words_count=self.stat.words_count,
+                                subject=self.stat.get(sentence_part[0]), predicate=self.stat_dict.get(sentence_part[1]),
+                                addition=self.stat.get(sentence_part[2]), attribute=self.stat.get(sentence_part[3]),
+                                adverbial_modifier=self.stat.get(sentence_part[4]),
+                                unknown=self.stat.get(sentence_part[5]))
+        db.session.add(rec)
+        db.session.commit()
+
+        # print(unique_words)
 
     # def calculate_sentence_part(self,speech_part):
     #     if speech_part == "NOUN"
@@ -182,10 +190,11 @@ class Analyzer(object):
     #     s = buf.readline()
 
 
+ALLOWED_EXTENSIONS = {'txt', 'docx'}
+
+
 def allowed_file(filename):
-    if '.' in filename and filename.rsplit('.', 1)[1] == 'txt':
-        return 'txt'
-    elif '.' in filename and filename.rsplit('.', 1)[1] == 'docx':
-        return 'docx'
+    if '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS:
+        return filename.rsplit('.', 1)[1]
     else:
-        return 'undef'
+        return "undef"

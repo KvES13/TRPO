@@ -8,19 +8,9 @@
 
 {% if stat !=0 %}
 
-    <div class="row mb-2 ml-5" >
+    <div class="row mb-2 ml-5 font-size: 14px" >
     <div class="col-md-4">
-         <p>
-        Выберите
-    <select>
-  <option>Все</option>
-  <option>Подлежащее</option>
-  <option>Сказуемое</option>
-  <option>Определение</option>
-  <option>Дополнение</option>
-  <option>Обстоятельство</option>
-    </select>
-    </p>
+
          <table class="table table-striped table-sm">
           <thead>
             <tr>
@@ -30,31 +20,48 @@
             </tr>
           </thead>
           <tbody>
-           {% for key, value in stat.getDict().items() %}
+           {% for ind in range(6) %}
             <tr>
-              <td>{{key}}</td>
-                {% if stat.getWordsCount() == 0 %}
+              <td>{{sentence_part[ind]}}</td>
+                {% if words_count == 0 %}
               <td>{{ 0 }}</td>
               <td>{{ 0 }}</td>
                  {% else %}
-                <td>{{ value }}</td>
-              <td>{{ value/stat.getWordsCount() * 100 }}</td>
+                <td>{{ values[ind] }}</td>
+              <td>{{ values[ind]/words_count * 100 }}</td>
                 {% endif %}
             </tr>
           {% endfor %}
           </tbody>
         </table>
     </div>
-    <section>
-       <textarea class="textarea-bootstrap-highlight" cols="110" rows="20" placeholder="Вставьте текст..." readonly>
-           {{stat.getText()}}
-       </textarea>
+        <form method="post">
+    <p>
+        Выберите
+        <select name="role">
+        <option>Все</option>
+        {% for ind in range(6) %}
+        <option>{{sentence_part[ind]}}</option>
+        {% endfor %}
+        </select>
 
-    </section>
+
+	    <label for="word">Слово</label>
+	    <input type="text" name="word">
+
+
+	    <input type="submit">
+	</p>
+    </form>
 
   </div>
+<!--    <section>-->
+<!--       <textarea class="textarea-bootstrap-highlight" cols="110" rows="20" placeholder="Вставьте текст..." readonly>-->
+<!--           {{text}}-->
+<!--       </textarea>-->
 
+<!--    </section>-->
 {% endif %}
-
+        <p>{{text | safe}}.</p>
 
 {% endblock %}

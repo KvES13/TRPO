@@ -5,6 +5,7 @@ from datetime import datetime
 # >>> from app import db
 # >>> db.create_all()
 
+
 class Files(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(30), nullable=False)
@@ -35,8 +36,9 @@ class Statistics(db.Model):
 
 class Sentences(db.Model):
     # file_id = db.Column(db.Integer, db.ForeignKey('files.id'), primary_key=True)
+    # id = db.Column(db.Integer, primary_key=True)
     file_id = db.Column(db.Integer, primary_key=True)
-    id = db.Column(db.Integer,  primary_key=True)
+    number = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.Text, nullable=False)
 
     def __repr__(self):
@@ -53,8 +55,8 @@ class Words(db.Model):
 
 class WordsList(db.Model):
     file_id = db.Column(db.Integer, primary_key=True)
-    sentence_id = db.Column(db.Integer,  primary_key=True)
-    word_id = db.Column(db.Integer )
+    sentence_id = db.Column(db.Integer, primary_key=True)
+    word_id = db.Column(db.Integer)
     # file_id = db.Column(db.Integer, db.ForeignKey('files.id'), primary_key=True)
     # sentence_id = db.Column(db.Integer, db.ForeignKey('sentences.id'), primary_key=True)
     # word_id = db.Column(db.Integer, db.ForeignKey('words.id'))
