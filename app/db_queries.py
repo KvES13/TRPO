@@ -11,9 +11,10 @@ def get_sentences(f_id, sentences_type, key):
         w_dict = make_words_dict(f_id, sentences_type, key)
     sentences_number = 1
     if key == "":
-        records = db.session.query(Sentences.text).filter(Files.id == f_id).all()
+        records = db.session.query(Sentences.text).filter(Sentences.file_id == f_id).all()
 
         for row in records:
+            print(f_id,row)
             if sentences_number in w_dict:
                 file_text += add_color(row[0], w_dict.get(sentences_number))
             else:
