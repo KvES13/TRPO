@@ -6,7 +6,7 @@
 
 {% block body %}
 
-{% if stat !=0 %}
+{% if values[0] != 0 %}
 
     <div class="row mb-2 ml-5 font-size: 14px" >
     <div class="col-md-4">
@@ -20,16 +20,11 @@
             </tr>
           </thead>
           <tbody>
-           {% for ind in range(6) %}
+           {% for ind in range(1,7) %}
             <tr>
-              <td>{{sentence_part[ind]}}</td>
-                {% if words_count == 0 %}
-              <td>{{ 0 }}</td>
-              <td>{{ 0 }}</td>
-                 {% else %}
+              <td>{{values[ind]}}</td>
                 <td>{{ values[ind] }}</td>
-              <td>{{ values[ind]/words_count * 100 }}</td>
-                {% endif %}
+              <td>{{ values[ind]/values[0] * 100 }}</td>
             </tr>
           {% endfor %}
           </tbody>
@@ -39,18 +34,19 @@
     <p>
         Выберите
         <select name="role">
-        <option>Все</option>
-        {% for ind in range(6) %}
-        <option>{{sentence_part[ind]}}</option>
+        {% for ind in range(7) %}
+                {% if cb_values[0] == ind %}
+                    <option selected>{{sentence_part[ind]}}</option>
+                {% else %}
+                    <option >{{sentence_part[ind]}}</option>
+                {% endif %}
         {% endfor %}
         </select>
 
+        <label for="word">Слово</label>
+        <input type="text" name="word" value={{cb_values[1]}}>
 
-	    <label for="word">Слово</label>
-	    <input type="text" name="word">
-
-
-	    <input type="submit">
+        <input type="submit">
 	</p>
     </form>
 

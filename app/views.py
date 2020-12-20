@@ -1,13 +1,12 @@
-from flask import render_template, url_for, request, redirect
-from app import app, db, models, db_queries
+from flask import render_template, request, redirect
+from app import app, db, models, db_queries, file_handler, sentence_info as si
 from datetime import datetime
-from .text_handler.file_reader import Analyzer, FileContent, sentence_part, allowed_file
 import os
 from werkzeug.utils import secure_filename
 
 
 uploads_dir = os.path.join(app.root_path, 'uploads')
-bg_colors = ('bg-primary', 'bg-success', 'bg-warning', 'bg-info', 'bg-dark', 'bg-danger')
+bg_colors = ('bg-info','bg-primary', 'bg-success', 'bg-warning', 'bg-info', 'bg-dark', 'bg-danger')
 
 
 @app.route('/', methods=['POST', 'GET'])
@@ -15,33 +14,31 @@ bg_colors = ('bg-primary', 'bg-success', 'bg-warning', 'bg-info', 'bg-dark', 'bg
 def index():
     if request.method == 'POST':
         file = request.files["file"]
-        print("text")
         if file:
-            file_format = allowed_file(file.filename)
+            file_format = file_handler.allowed_file(file.filename)
             if file_format == 'undef':
                 return render_template("/index.html", error="Формат данного файла не поддерживается")
             else:
-                print(file.filename)
                 filename = file.filename
                 filepath = os.path.join(uploads_dir, secure_filename(file.filename))
-
                 exists = models.Files.query.filter_by(filename=filename).first()
                 if exists:
                     exists.date = datetime.now()
                     db.session.commit()
                     return redirect('/text-analysis')
                 else:
-                    print(file_format)
-                    print("      form")
                     file.save(filepath)
-                    dfile = models.Files(filename=filename, filepath=filepath,
-                                         date=datetime.now())
-                    try:
-                        db.session.add(dfile)
-                        db.session.commit()
-                        return redirect('/text-analysis')
-                    except:
-                        return render_template("/index.html", error="При добавлени записи произошла ошибка")
+                    dfile = models.Files(filename=filename, filepath=filepath, date=datetime.now())
+                    # try:
+                    db.session.add(dfile)
+                    db.session.commit()
+                    analyzer = file_handler.Analyzer(dfile.id)
+                    print(file_format,"  ",filepath)
+                    print(file_handler.read_from_file(file_format, filepath))
+                    analyzer.ultra_mega_algo(file_handler.read_from_file(filepath, file_format))
+                    return redirect('/text-analysis')
+                    # except:
+                    # return render_template("/index.html", error="При добавлени записи произошла ошибка")
 
     else:
         return render_template("/index.html", error=0)
@@ -55,13 +52,10 @@ def about():
 @app.route('/show-statistics')
 def show_statistics():
     exists = models.Files.query.first()
+    files = 0
     if exists:
-        print("ex show")
         files = models.Files.query.order_by(models.Files.date.desc()).all()
-        print(files)
-    else:
-        print("net show")
-        files = 0
+
     return render_template("show-statistics.html", files=files)
 
 
@@ -73,60 +67,35 @@ def show_statistics_detail(id):
     # parts = {sentence_part[0]: stat.subject, sentence_part[1]: stat.predicate, sentence_part[2]: stat.addition,
     #          sentence_part[3]: stat.attribute, sentence_part[4]: stat.adverbial_modifier,
     #          sentence_part[5]: stat.unknown}
-    values = (stat.subject, stat.predicate, stat.addition, stat.attribute, stat.adverbial_modifier, stat.unknown)
-    return render_template("statistics-detail.html", words_count=stat.words_count, sentence_part=sentence_part,
-                           dfile=dfile, bg_colors=bg_colors, values=values, lenght=6)
-
-
-# # Create a directory in a known location to save files to.
-# uploads_dir = os.path.join(app.instance_path, 'uploads')
-# # os.makedirs(uploads_dir, exists_ok=True)
-# MAX_FILE_SIZE = 1024 * 1024 + 1
+    values = (stat.words_count, stat.subject, stat.predicate, stat.addition, stat.attribute, stat.adverbial_modifier, stat.unknown)
+    return render_template("statistics-detail.html", sentence_part=si.parts,
+                           dfile=dfile, bg_colors=bg_colors, values=values)
 
 
 @app.route("/text-analysis", methods=['POST', 'GET'])
 def text_analysis():
     dfile = models.Files.query.order_by(models.Files.date.desc()).first()
-    if request.method == 'POST':
-        word = request.form.get('word')
-        role = request.form.get('role')
-
-        if role == 'Подлежащее':
-            r = 0
-        elif role == 'Сказуемое':
-            r = 1
-        elif role == 'Дополнение':
-            r = 2
-        elif role == 'Определение':
-            r = 3
-        elif role == 'Обстоятельство':
-            r = 4
+    text = ""
+    cb_values = (0, "")
+    if dfile:
+        if request.method == 'POST':
+            word = request.form.get('word')
+            role = request.form.get('role')
+            role_index = si.parts.index(role)
+            text = db_queries.get_sentences(dfile.id,role_index, word)
+            cb_values = (role_index, word)
         else:
-            r = 5
-        print(word, '  ', role)
-        # TODO Вынести в класс
+            text = db_queries.get_sentences(dfile.id, si.SParts.all, "")
         record = db_queries.get_file_stat(dfile.id)
-        values = (record.subject, record.predicate, record.addition, record.attribute,
+        values = (record.words_count,record.subject, record.predicate, record.addition, record.attribute,
                   record.adverbial_modifier, record.unknown)
 
-        text = db_queries.get_sentences(dfile.id, r, word)
-        return render_template("text-analysis.html", words_count=record.words_count,
-                               values=values, text=text, sentence_part=sentence_part)
+        return render_template("text-analysis.html", values=values, text=text,
+                               sentence_part=si.parts,cb_values=cb_values)
     else:
-        stat = 0
-        words_count = 0
-        if dfile:
-            ftext = FileContent(dfile.filename, dfile.filepath, dfile.date, allowed_file(dfile.filename))
-            exists = models.Statistics.query.filter_by(parent_id=dfile.id).first()
 
-            if not exists:
-                analyzer = Analyzer(dfile.id, ftext.getFileText())
-                analyzer.ultra_mega_algo()
-            record = db_queries.get_file_stat(dfile.id)
-            values = (record.subject, record.predicate, record.addition, record.attribute,
-                      record.adverbial_modifier, record.unknown)
+        values = (0, 0, 0, 0, 0, 0, 0)
 
-        text = db_queries.get_sentences(dfile.id, 0, "")
-        return render_template("text-analysis.html", words_count=record.words_count,
-                               values=values, text=text, sentence_part=sentence_part)
+        return render_template("text-analysis.html", values=values, text=text,
+                               sentence_part=si.parts, cb_values=cb_values)
 
